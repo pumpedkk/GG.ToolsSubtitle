@@ -10,10 +10,7 @@
     "GGTools.Subtitle"
   ],
   "dependencies": {
-    "com.unity.textmeshpro": "3.0.8",
-    "com.ggtools.docreader" : "1.0.0",
-    "com.ggtools.spriteultilitis" : "1.0.0",
-    "com.ggtools.tmproultilitis" : "1.0.0"
+    "com.unity.textmeshpro": "3.0.8"
   },
   "author": {
     "name": "Lucas Valverde",
