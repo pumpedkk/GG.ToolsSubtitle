@@ -1,0 +1,24 @@
+{
+  "name": "com.ggtools.subtitle",
+  "version": "1.0.0",
+  "displayName": "Subtitle",
+  "description": "Provides a complete subtitle and dialogue management system with support for CSV-based script parsing, TextMeshPro typewriter animation, automatic text pagination, audio-driven subtitle progression, character name display, portrait and pose rendering, and customizable timing options. Includes utilities for loading external dialogue scripts, splitting long text into multiple speech pages, handling runtime subtitle flow, and enabling fine-grained feature toggling via SubtitleType flags.",
+  "unity": "6000.0",
+ "keywords": [
+    "Subtitle",
+    "GGTools",
+    "GGTools.Subtitle"
+  ],
+  "dependencies": {
+    "com.unity.textmeshpro": "3.0.8",
+    "com.ggtools.docreader" : "https://github.com/pumpedkk/GG.ToolsDocReader",
+    "com.ggtools.spriteultilitis" : "https://github.com/pumpedkk/GG.ToolsSpriteUltilitis" ,
+    "com.ggtools.tmproultilitis" : "https://github.com/pumpedkk/GG.ToolsTmproUltilitis"
+
+  },
+  "author": {
+    "name": "Lucas Valverde",
+    "email": "lucashvfgomes@gmail.com",
+    "url": "https://lucashvfgomes.wixsite.com/my-site"
+  }
+}
