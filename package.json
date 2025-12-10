@@ -11,10 +11,9 @@
   ],
   "dependencies": {
     "com.unity.textmeshpro": "3.0.8",
-    "com.ggtools.docreader" : "https://github.com/pumpedkk/GG.ToolsDocReader",
-    "com.ggtools.spriteultilitis" : "https://github.com/pumpedkk/GG.ToolsSpriteUltilitis" ,
-    "com.ggtools.tmproultilitis" : "https://github.com/pumpedkk/GG.ToolsTmproUltilitis"
-
+    "com.ggtools.docreader" : "1.0.0",
+    "com.ggtools.spriteultilitis" : "1.0.0",
+    "com.ggtools.tmproultilitis" : "1.0.0"
   },
   "author": {
     "name": "Lucas Valverde",
