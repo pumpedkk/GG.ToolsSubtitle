@@ -137,7 +137,7 @@ namespace GGTools.Subtitle
                 Invoke("StopSubtitle", 1f);
                 return;
             }
-
+            characterSpeech[subtitleIndex].endEvents.Invoke();
             subtitleIndex++;
             SubtitleInstance(subtitleIndex);
 
@@ -216,6 +216,7 @@ namespace GGTools.Subtitle
             }
             else
             {
+                characterSpeech[subIndex].startEvent.Invoke();
                 subtitle.SetActive(true);
                 if (subititleType.HasFlag(SubtitleType.TypewriterEffect))
                 {
