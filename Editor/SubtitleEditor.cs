@@ -24,6 +24,7 @@ namespace GGTools.Subtitle
 
         #region NameReferences
         SerializedProperty nameTextProp;
+        SerializedProperty hasTextBoxProp;
         SerializedProperty splitCharacterProp;
         #endregion
 
@@ -66,6 +67,7 @@ namespace GGTools.Subtitle
             subtitleProp = serializedObject.FindProperty("subtitle");
             subtitleTextProp = serializedObject.FindProperty("subtitleText");
             nameTextProp = serializedObject.FindProperty("nameText");
+            hasTextBoxProp = serializedObject.FindProperty("hasTextBox");
             portraitProp = serializedObject.FindProperty("portrait");
             canSetNativeSizePortraitProp = serializedObject.FindProperty("canSetNativeSizePortrait");
             setNativeTypePortraitProp = serializedObject.FindProperty("setNativeTypePortrait");
@@ -209,9 +211,14 @@ namespace GGTools.Subtitle
                 EditorGUILayout.Space();
                 EditorGUILayout.LabelField("Name TextBox Config", EditorStyles.boldLabel);
                 EditorGUILayout.Space();
-                EditorGUI.indentLevel++;
-                EditorGUILayout.PropertyField(nameTextProp, new GUIContent("Name TextBox"));
+                EditorGUILayout.PropertyField(hasTextBoxProp, new GUIContent("Has Text Box"));
+                EditorGUILayout.Space();
+                if (hasTextBoxProp.boolValue) 
+                {
+                    EditorGUI.indentLevel++;
+                    EditorGUILayout.PropertyField(nameTextProp, new GUIContent("Name TextBox"));
 
+                }
                 if (type.HasFlag(SubtitleType.CharacterPose))
                 {
                     EditorGUILayout.PropertyField(splitCharacterProp, new GUIContent("Char to Split Name And Pose"));

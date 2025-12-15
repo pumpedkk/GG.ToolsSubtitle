@@ -30,6 +30,7 @@ namespace GGTools.Subtitle
 
         #region NameReferences
         [SerializeField] private TextMeshProUGUI nameText;
+        [SerializeField] private bool hasTextBox;
         #endregion
 
         #region PortraitReferences
@@ -137,7 +138,7 @@ namespace GGTools.Subtitle
                 Invoke("StopSubtitle", 1f);
                 return;
             }
-            characterSpeech[subtitleIndex].endEvents.Invoke();
+            characterSpeech[subtitleIndex].endEvents?.Invoke();
             subtitleIndex++;
             SubtitleInstance(subtitleIndex);
 
@@ -216,7 +217,7 @@ namespace GGTools.Subtitle
             }
             else
             {
-                characterSpeech[subIndex].startEvent.Invoke();
+                characterSpeech[subIndex].startEvent?.Invoke();
                 subtitle.SetActive(true);
                 if (subititleType.HasFlag(SubtitleType.TypewriterEffect))
                 {
@@ -224,9 +225,25 @@ namespace GGTools.Subtitle
                 }
                 if (subititleType.HasFlag(SubtitleType.Subtitle))
                 {
-                    subtitleText.Type(this, characterSpeech[subIndex].text, timeWriterAux);
+                    if (!hasTextBox) 
+                    {
+                        if (subititleType.HasFlag(SubtitleType.CharacterPose))
+                        {
+                            string name = characterSpeech[subIndex].name.Split(splitCharacter)[0];
+                            subtitleText.Type(this, name + ": " + characterSpeech[subIndex].text, timeWriterAux);
+                        }
+                        else 
+                        {
+                            subtitleText.Type(this, characterSpeech[subIndex].name + ": " + characterSpeech[subIndex].text, timeWriterAux);
+                        }
+ 
+                    }
+                    else
+                    {
+                        subtitleText.Type(this, characterSpeech[subIndex].text, timeWriterAux);
+                    }
                 }
-                if (subititleType.HasFlag(SubtitleType.Name))
+                if (subititleType.HasFlag(SubtitleType.Name) && hasTextBox)
                 {
                     if (subititleType.HasFlag(SubtitleType.CharacterPose))
                     {
@@ -364,11 +381,37 @@ namespace GGTools.Subtitle
             _ClearScript();
             listName = dialogueScript.name;
             string[][] file = dialogueScript.ReadLines().SplitCSV(csvSplitter);
-
-            foreach (string[] s in file)
+            if (file[0].Length > 1)
             {
-                CreateCharacterSpeech(s);
+                foreach (string[] s in file)
+                {
+                    CreateCharacterSpeech(s);
+                }
             }
+            else
+            {
+                foreach (string[] s in file)
+                {
+                    if (s[0].Length > maxCharacters)
+                    {
+                        string[] textPages = s[0].CreatePage(maxCharacters);
+                        int pageAux = 0;
+                        foreach (string p in textPages)
+                        {
+                            if (p != "" && p != " " && p != " ")
+                            {
+                                characterSpeech.Add(new CharacterSpeech(p));
+                            }
+                            pageAux++;
+                        }
+                    }
+                    else
+                    {
+                        characterSpeech.Add(new CharacterSpeech(s[0]));
+                    }
+                }
+            }
+            characterSpeech[^1].nextType = WhatToDoNext.Stop;
         }
         /// <summary>
         /// Converts a CSV line into a CharacterSpeech object, handling automatic text pagination
@@ -463,6 +506,16 @@ namespace GGTools.Subtitle
         public bool customAudioTime = true;
         public bool page;
         public int pageIndex;
+
+        public CharacterSpeech(string scriptText) 
+        {
+            text = scriptText;
+            hasText = true;
+        }
+        public CharacterSpeech()
+        {
+            
+        }
     }
 
     /// <summary>
