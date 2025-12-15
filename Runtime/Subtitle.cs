@@ -102,7 +102,7 @@ namespace GGTools.Subtitle
             SubtitleInstance(0);
             subtitleIndex = 0;
 
-            if (characterSpeech[subtitleIndex].speech == null)
+            if (characterSpeech[subtitleIndex].timeToNext > 0)
             {
                 Invoke("_NextSubtitle", characterSpeech[subtitleIndex].timeToNext);
             }
@@ -142,7 +142,7 @@ namespace GGTools.Subtitle
             subtitleIndex++;
             SubtitleInstance(subtitleIndex);
 
-            if (characterSpeech[subtitleIndex].speech == null)
+            if (characterSpeech[subtitleIndex].timeToNext > 0)
             {
                 Invoke("_NextSubtitle", characterSpeech[subtitleIndex].timeToNext);
             }
@@ -360,7 +360,8 @@ namespace GGTools.Subtitle
                 }
                 if (subititleType.HasFlag(SubtitleType.Audio))
                 {
-                    audioSource.PlayOneShot(characterSpeech[subIndex].speech);
+                    if(characterSpeech[subIndex].speech != null)
+                        audioSource.PlayOneShot(characterSpeech[subIndex].speech);
                 }
             }
         }
