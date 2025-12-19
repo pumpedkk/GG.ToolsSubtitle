@@ -26,6 +26,7 @@ namespace GGTools.Subtitle
         SerializedProperty nameTextProp;
         SerializedProperty hasTextBoxProp;
         SerializedProperty splitCharacterProp;
+        SerializedProperty namesProp;
         #endregion
 
         #region PortraitReferences
@@ -86,6 +87,7 @@ namespace GGTools.Subtitle
             maxCharactersProp = serializedObject.FindProperty("maxCharacters");
             playOnAwakeProp = serializedObject.FindProperty("playOnAwake");
             delayToPlayProp = serializedObject.FindProperty("delayToPlay");
+            namesProp = serializedObject.FindProperty("names");
 
             #region AdvancedSettings
                         advancedSettingsProp = serializedObject.FindProperty("advancedSettings");
@@ -154,6 +156,11 @@ namespace GGTools.Subtitle
             EditorGUILayout.LabelField("Subtitle Type", EditorStyles.boldLabel);
 
             EditorGUILayout.Space();
+
+            if (listnameProp.stringValue != "List of Character Speech") 
+            {
+                EditorGUILayout.PropertyField(namesProp, new GUIContent("Names Style"), true);
+            }
 
             EditorGUI.BeginChangeCheck();
 

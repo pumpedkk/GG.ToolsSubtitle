@@ -1,11 +1,11 @@
-using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
 using GGTools.FileReaders;
-using GGTools.TMProUltilitis;
 using GGTools.SpriteUltilitis;
+using GGTools.TMProUltilitis;
 using System.Collections.Generic;
+using TMPro;
+using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.UI;
 
 namespace GGTools.Subtitle
 {
@@ -31,6 +31,7 @@ namespace GGTools.Subtitle
         #region NameReferences
         [SerializeField] private TextMeshProUGUI nameText;
         [SerializeField] private bool hasTextBox;
+        [SerializeField] private List<NameStyle> names = new List<NameStyle>();
         #endregion
 
         #region PortraitReferences
@@ -258,11 +259,11 @@ namespace GGTools.Subtitle
                         if (subititleType.HasFlag(SubtitleType.CharacterPose))
                         {
                             string name = characterSpeech[subIndex].name.Split(splitCharacter)[0];
-                            subtitleText.Type(this, name + ": " + characterSpeech[subIndex].text, timeWriterAux);
+                            subtitleText.Type(this, GetName(name) + ": " + characterSpeech[subIndex].text, timeWriterAux);
                         }
                         else 
                         {
-                            subtitleText.Type(this, characterSpeech[subIndex].name + ": " + characterSpeech[subIndex].text, timeWriterAux);
+                            subtitleText.Type(this, GetName(characterSpeech[subIndex].name) + ": " + characterSpeech[subIndex].text, timeWriterAux);
                         }
  
                     }
@@ -275,11 +276,11 @@ namespace GGTools.Subtitle
                 {
                     if (subititleType.HasFlag(SubtitleType.CharacterPose))
                     {
-                        nameText.text = characterSpeech[subIndex].name.Split(splitCharacter)[0];
+                        nameText.text = GetName(characterSpeech[subIndex].name.Split(splitCharacter)[0]);
                     }
                     else
                     {
-                        nameText.text = characterSpeech[subIndex].name;
+                        nameText.text = GetName(characterSpeech[subIndex].name);
                     }
                 }
                 if (subititleType.HasFlag(SubtitleType.Portrait) && subititleType.HasFlag(SubtitleType.CharacterPose))
@@ -469,6 +470,10 @@ namespace GGTools.Subtitle
             }
 
             aux.name = line[characterNamePosition];
+            if (VerifyName(aux.name.Split(splitCharacter)[0]))
+            {
+                names.Add(new NameStyle(aux.name.Split(splitCharacter)[0]));
+            }
 
             if (line[characterSpeechPosition].Length > maxCharacters)
             {
@@ -502,6 +507,47 @@ namespace GGTools.Subtitle
                     
             }
 
+        }
+        bool VerifyName(string n) 
+        {
+            foreach(NameStyle style in names) 
+            {
+                if(style.name == n)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        string GetName(string n) 
+        {
+            string returnString = "";
+            NameStyle aux = new NameStyle();
+            foreach (NameStyle style in names)
+            {
+                if (style.name == n)
+                {
+                    aux = style;
+                }
+            }
+            if (!string.IsNullOrEmpty(aux.name))
+            {
+                if(aux.fontStyle == FontStyle.Bold) 
+                {
+                    returnString = TMProUltils.Colorize(TMProUltils.Bold(aux.name),aux.color);
+                }
+                else if (aux.fontStyle == FontStyle.Italic)
+                {
+                    returnString = TMProUltils.Colorize(TMProUltils.Italic(aux.name), aux.color);
+                }
+                else if (aux.fontStyle == FontStyle.BoldAndItalic)
+                {
+                    returnString = TMProUltils.Colorize(TMProUltils.Italic(TMProUltils.Bold(aux.name)), aux.color);
+                }
+
+            }
+            return returnString;
         }
         public void CreateDialogueEditor() => _CreateDialogueScript();
 
@@ -603,5 +649,19 @@ namespace GGTools.Subtitle
         None = 0,
         Multiply = 1,
         Divide = 2
+    }
+
+    [System.Serializable]
+    public class NameStyle
+    {
+        public string name;
+        public Color color;
+        public FontStyle fontStyle;
+
+        public NameStyle(string n)
+        {
+            name = n;
+        }
+        public NameStyle() { }
     }
 }
