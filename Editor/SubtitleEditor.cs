@@ -49,7 +49,7 @@ namespace GGTools.Subtitle
         SerializedProperty nextSubtitleOnItEndProp;
         #endregion
 
-        SerializedProperty characterSpeechProp;
+        SerializedProperty scriptSpeechProp;
 
         #region AdvancedSettings
         SerializedProperty advancedSettingsProp;
@@ -80,7 +80,7 @@ namespace GGTools.Subtitle
             multiplyFactorPoseProp = serializedObject.FindProperty("multiplyFactorPose");
             divideFactorPoseProp = serializedObject.FindProperty("divideFactorPose");
             typewriterEffectTimeProp = serializedObject.FindProperty("typewriterEffectTime");
-            characterSpeechProp = serializedObject.FindProperty("characterSpeech");
+            scriptSpeechProp = serializedObject.FindProperty("scriptSpeeches");
             audioSourceProp = serializedObject.FindProperty("audioSource");
             nextSubtitleOnItEndProp = serializedObject.FindProperty("nextSubtitleOnItEnd");
             maxCharactersProp = serializedObject.FindProperty("maxCharacters");
@@ -161,7 +161,7 @@ namespace GGTools.Subtitle
 
             EditorGUILayout.Space();
 
-            EditorGUILayout.PropertyField(characterSpeechProp, new GUIContent(listnameProp.stringValue), true);
+            EditorGUILayout.PropertyField(scriptSpeechProp, new GUIContent(listnameProp.stringValue), true);
 
             EditorGUILayout.Space();
 
@@ -368,7 +368,6 @@ namespace GGTools.Subtitle
             var startEventsProp = property.FindPropertyRelative("startEvent");
             var hasNameProp = property.FindPropertyRelative("hasName");
             var hasTextProp = property.FindPropertyRelative("hasText");
-            var hasAudioProp = property.FindPropertyRelative("hasAudio");
             var customAudioTimeProp = property.FindPropertyRelative("customAudioTime");
 
             var lineHeight = EditorGUIUtility.singleLineHeight;
@@ -389,12 +388,6 @@ namespace GGTools.Subtitle
             if (customAudioTimeProp.boolValue)
             {
                 EditorGUI.PropertyField(new Rect(position.x, y, position.width, lineHeight), timeToNextProp);
-                y += lineHeight + 4;
-            }
-            if (hasAudioProp.boolValue)
-            {
-                EditorGUI.PropertyField(new Rect(position.x, y, position.width, lineHeight), speechProp);
-                
                 y += lineHeight + 4;
             }
 

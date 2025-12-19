@@ -58,7 +58,12 @@ namespace GGTools.Subtitle
 
         #endregion
 
-        [SerializeField] private List<CharacterSpeech> characterSpeech = new List<CharacterSpeech>();
+        [SerializeField] private bool playOnAwake;
+        [SerializeField] private float delayToPlay;
+
+        [SerializeField] private List<ScriptSpeech> scriptSpeeches = new ();
+
+        private List<CharacterSpeech> characterSpeech = new List<CharacterSpeech>();
         #endregion
 
         #region AdvancedSettings
@@ -88,6 +93,29 @@ namespace GGTools.Subtitle
                 if (!TryGetComponent<AudioSource>(out audioSource))
                 {
                     audioSource = this.gameObject.AddComponent<AudioSource>();
+                }
+            }
+
+            ScriptToCharacter();
+
+            if (playOnAwake) 
+            {
+                Invoke(nameof(_StartSubtitle), delayToPlay);
+            }
+
+        }
+
+        void ScriptToCharacter() 
+        {
+            if (characterSpeech != null)
+            {
+                foreach (var scriptSpeech in scriptSpeeches)
+                {
+                    if (scriptSpeech.characterSpeechs != null)
+                    {
+                        scriptSpeech.characterSpeechs[0].speech = scriptSpeech.speech;
+                        characterSpeech.AddRange(scriptSpeech.characterSpeechs);
+                    }
                 }
             }
         }
@@ -368,6 +396,7 @@ namespace GGTools.Subtitle
         private void _ClearScript()
         {
             listName = "List of Character Speech";
+            scriptSpeeches.Clear();
             characterSpeech.Clear();
         }
         public void ClearScriptEditor() => _ClearScript();
@@ -412,14 +441,14 @@ namespace GGTools.Subtitle
                     }
                 }
             }
-            characterSpeech[^1].nextType = WhatToDoNext.Stop;
+            scriptSpeeches[^1].characterSpeechs[^1].nextType = WhatToDoNext.Stop;
         }
         /// <summary>
         /// Converts a CSV line into a CharacterSpeech object, handling automatic text pagination
         /// when text exceeds the maximum character limit.
         /// </summary>
         /// <param name="line">The parsed CSV values for a dialogue row.</param>
-        private void CreateCharacterSpeech(string[] line, bool page = false, float pageIndex = 0)
+        private void CreateCharacterSpeech(string[] line, bool page = false, int pageIndex = 0)
         {
             CharacterSpeech aux = new CharacterSpeech();
             if (subititleType.HasFlag(SubtitleType.Subtitle))
@@ -428,7 +457,6 @@ namespace GGTools.Subtitle
             }
             if (subititleType.HasFlag(SubtitleType.Audio))
             {
-                aux.hasAudio = true;
                 if (nextSubtitleOnItEnd)
                 {
                     aux.customAudioTime = false;
@@ -444,6 +472,8 @@ namespace GGTools.Subtitle
 
             if (line[characterSpeechPosition].Length > maxCharacters)
             {
+                scriptSpeeches.Add(new ScriptSpeech(scriptSpeeches.Count + 1));
+                
                 string[] textPages = line[characterSpeechPosition].CreatePage(maxCharacters);
                 int pageAux = 0;
                 foreach (string p in textPages)
@@ -453,7 +483,7 @@ namespace GGTools.Subtitle
                     pageSpeech[characterSpeechPosition] = p;
                     if (p != "" && p != " " && p != " ")
                     {
-                        CreateCharacterSpeech(pageSpeech, true, pageAux);
+                        CreateCharacterSpeech(pageSpeech, true, scriptSpeeches.Count -1);
                     }
                     pageAux++;
                 }
@@ -461,7 +491,15 @@ namespace GGTools.Subtitle
             else
             {
                 aux.text = line[characterSpeechPosition];
-                characterSpeech.Add(aux);
+                if (page)
+                {
+                    scriptSpeeches[^1].characterSpeechs.Add(aux);
+                }
+                else 
+                {
+                    scriptSpeeches.Add(new ScriptSpeech(aux, scriptSpeeches.Count + 1));
+                }
+                    
             }
 
         }
@@ -492,7 +530,6 @@ namespace GGTools.Subtitle
         public string name;
         public string text;
         public AudioClip speech;
-
         public WhatToDoNext nextType = WhatToDoNext.NextSubtitle;
 
         public UnityEvent startEvent;
@@ -503,7 +540,6 @@ namespace GGTools.Subtitle
 
         public bool hasName;
         public bool hasText;
-        public bool hasAudio;
         public bool customAudioTime = true;
         public bool page;
         public int pageIndex;
@@ -517,6 +553,24 @@ namespace GGTools.Subtitle
         {
             
         }
+    }
+
+    [System.Serializable]
+    public class ScriptSpeech 
+    {
+        [HideInInspector] public string name;
+        public AudioClip speech;
+        public List<CharacterSpeech> characterSpeechs = new List<CharacterSpeech>();
+        public ScriptSpeech(CharacterSpeech characterSpeech, int line) 
+        {
+            name = "Line " + line;
+            characterSpeechs.Add(characterSpeech);
+        }
+        public ScriptSpeech(int line)
+        {
+            name = "Line " + line;
+        }
+
     }
 
     /// <summary>
