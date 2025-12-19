@@ -1,8 +1,5 @@
-using System;
-using Unity.Collections.LowLevel.Unsafe;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 
 namespace GGTools.Subtitle
@@ -13,6 +10,9 @@ namespace GGTools.Subtitle
         SerializedProperty listnameProp;
 
         SerializedProperty subtitleTypeProp;
+
+        SerializedProperty playOnAwakeProp;
+        SerializedProperty delayToPlayProp;
 
         SerializedProperty dialogueScriptProp;
         SerializedProperty subtitleProp;
@@ -84,6 +84,8 @@ namespace GGTools.Subtitle
             audioSourceProp = serializedObject.FindProperty("audioSource");
             nextSubtitleOnItEndProp = serializedObject.FindProperty("nextSubtitleOnItEnd");
             maxCharactersProp = serializedObject.FindProperty("maxCharacters");
+            playOnAwakeProp = serializedObject.FindProperty("playOnAwake");
+            delayToPlayProp = serializedObject.FindProperty("delayToPlay");
 
             #region AdvancedSettings
                         advancedSettingsProp = serializedObject.FindProperty("advancedSettings");
@@ -125,6 +127,20 @@ namespace GGTools.Subtitle
                 }
                 EditorGUILayout.Space();
             }
+
+            playOnAwakeProp.boolValue = BoldToggle("Play On Awake", playOnAwakeProp.boolValue);
+
+            if (playOnAwakeProp.boolValue) 
+            {
+                EditorGUILayout.Space();
+
+                EditorGUILayout.PropertyField(delayToPlayProp, new GUIContent("Delay to Play"));
+
+            }
+
+
+            EditorGUILayout.Space();
+
             EditorGUILayout.LabelField("Subtitle Object", EditorStyles.boldLabel);
 
             EditorGUI.indentLevel++;
