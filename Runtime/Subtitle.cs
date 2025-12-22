@@ -167,6 +167,7 @@ namespace GGTools.Subtitle
             if (characterSpeech[subtitleIndex].nextType == WhatToDoNext.Stop)
             {
                 characterSpeech[subtitleIndex].nextType = WhatToDoNext.NextSubtitle;
+                characterSpeech[subtitleIndex].endEvents = null;
                 Invoke("StopSubtitle", 1f);
                 return;
             }
