@@ -162,11 +162,11 @@ namespace GGTools.Subtitle
                 Debug.LogError("No More Speech");
                 return;
             }
-
             characterSpeech[subtitleIndex].endEvents?.Invoke();
-
+            
             if (characterSpeech[subtitleIndex].nextType == WhatToDoNext.Stop)
             {
+                characterSpeech[subtitleIndex].nextType = WhatToDoNext.NextSubtitle;
                 Invoke("StopSubtitle", 1f);
                 return;
             }
