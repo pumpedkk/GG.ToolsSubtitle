@@ -162,12 +162,15 @@ namespace GGTools.Subtitle
                 Debug.LogError("No More Speech");
                 return;
             }
+
+            characterSpeech[subtitleIndex].endEvents?.Invoke();
+
             if (characterSpeech[subtitleIndex].nextType == WhatToDoNext.Stop)
             {
                 Invoke("StopSubtitle", 1f);
                 return;
             }
-            characterSpeech[subtitleIndex].endEvents?.Invoke();
+            
             subtitleIndex++;
             SubtitleInstance(subtitleIndex);
 
@@ -544,6 +547,10 @@ namespace GGTools.Subtitle
                 else if (aux.fontStyle == FontStyle.BoldAndItalic)
                 {
                     returnString = TMProUltils.Colorize(TMProUltils.Italic(TMProUltils.Bold(aux.name)), aux.color);
+                }
+                else if(aux.fontStyle == FontStyle.Normal) 
+                {
+                    returnString = TMProUltils.Colorize(aux.name, aux.color);
                 }
 
             }
