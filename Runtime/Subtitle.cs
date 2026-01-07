@@ -258,7 +258,7 @@ namespace GGTools.Subtitle
                 }
                 if (subititleType.HasFlag(SubtitleType.Subtitle))
                 {
-                    if (!hasTextBox) 
+                    if (!hasTextBox && subititleType.HasFlag(SubtitleType.Name))
                     {
                         if (subititleType.HasFlag(SubtitleType.CharacterPose))
                         {
@@ -413,40 +413,111 @@ namespace GGTools.Subtitle
         public static void CreateDialogueScript() => _inst._CreateDialogueScript();
         private void _CreateDialogueScript()
         {
-            _ClearScript();
-            listName = dialogueScript.name;
-            string[][] file = dialogueScript.ReadLines().SplitCSV(csvSplitter);
-            if (file[0].Length > 1)
+            
+            if(scriptSpeeches.Count <= 0)
             {
-                foreach (string[] s in file)
+                listName = dialogueScript.name;
+                string[][] file = dialogueScript.ReadLines().SplitCSV(csvSplitter);
+                if (file[0].Length > 1)
                 {
-                    CreateCharacterSpeech(s);
-                }
-            }
-            else
-            {
-                foreach (string[] s in file)
-                {
-                    if (s[0].Length > maxCharacters)
+                    foreach (string[] s in file)
                     {
-                        string[] textPages = s[0].CreatePage(maxCharacters);
-                        int pageAux = 0;
-                        foreach (string p in textPages)
+                        CreateCharacterSpeech(s);
+                    }
+                }
+                else
+                {
+                    foreach (string[] s in file)
+                    {
+                        if (s[0].Length > maxCharacters)
                         {
-                            if (p != "" && p != " " && p != " ")
+                            scriptSpeeches.Add(new ScriptSpeech(scriptSpeeches.Count + 1));
+
+                            string[] textPages = s[0].CreatePage(maxCharacters);
+                            foreach (string p in textPages)
                             {
-                                characterSpeech.Add(new CharacterSpeech(p));
+                                if (p != "" && p != " " && p != " ")
+                                {
+                                    scriptSpeeches[^1].characterSpeechs.Add(new CharacterSpeech(p));
+                                }
                             }
-                            pageAux++;
+                        }
+                        else
+                        {
+                            scriptSpeeches.Add(new ScriptSpeech(scriptSpeeches.Count + 1));
+                            scriptSpeeches[^1].characterSpeechs.Add(new CharacterSpeech(s[0]));
                         }
                     }
-                    else
-                    {
-                        characterSpeech.Add(new CharacterSpeech(s[0]));
-                    }
                 }
+                scriptSpeeches[^1].characterSpeechs[^1].nextType = WhatToDoNext.Stop;
             }
-            scriptSpeeches[^1].characterSpeechs[^1].nextType = WhatToDoNext.Stop;
+            else 
+            {
+                listName = dialogueScript.name;
+                string[][] file = dialogueScript.ReadLines().SplitCSV(csvSplitter);
+                if (file[0].Length > 1)
+                {
+                    int sS = 0;
+                    foreach (string[] s in file)
+                    {
+                        
+                        if (s[characterSpeechPosition].Length > maxCharacters)
+                        {
+                            int cS = 0;
+                            string[] textPages = s[0].CreatePage(maxCharacters);
+                            
+                            foreach (string p in textPages)
+                            {
+                                if (p != "" && p != " " && p != " ")
+                                {
+                                    scriptSpeeches[sS].characterSpeechs[cS].text = p;
+                                    scriptSpeeches[sS].characterSpeechs[cS].name = s[characterNamePosition];
+                                    cS++;
+                                }
+                                
+                            }
+                            
+                        }
+                        else
+                        {
+                            scriptSpeeches[sS].characterSpeechs[0].text = s[characterSpeechPosition];
+                            scriptSpeeches[sS].characterSpeechs[0].name = s[characterNamePosition];
+                        }
+                        sS++;
+                    }
+                    
+                }
+                else
+                {
+                    int sS = 0;
+                    foreach (string[] s in file)
+                    {
+                        if (s[0].Length > maxCharacters)
+                        {
+                            
+                            int cS = 0;
+                            string[] textPages = s[0].CreatePage(maxCharacters);
+                            foreach (string p in textPages)
+                            {
+                                if (p != "" && p != " " && p != " ")
+                                {
+                                    scriptSpeeches[sS].characterSpeechs[cS].text = p;
+                                    cS++;
+                                }
+                                
+                            }
+                            
+                        }
+                        else
+                        {
+                            scriptSpeeches[sS].characterSpeechs[0].text = s[0];
+                        }
+                        sS++;
+                    }
+                    
+                }
+                
+            }
         }
         /// <summary>
         /// Converts a CSV line into a CharacterSpeech object, handling automatic text pagination
