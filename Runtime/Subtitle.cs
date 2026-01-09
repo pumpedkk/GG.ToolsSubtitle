@@ -135,9 +135,13 @@ namespace GGTools.Subtitle
             {
                 Invoke("_NextSubtitle", characterSpeech[subtitleIndex].timeToNext);
             }
-            else
+            else if (characterSpeech[subtitleIndex].speech != null)
             {
                 Invoke("_NextSubtitle", characterSpeech[subtitleIndex].speech.length);
+            }
+            else
+            {
+                Invoke("_NextSubtitle", 1f);
             }
 
 
@@ -179,9 +183,13 @@ namespace GGTools.Subtitle
             {
                 Invoke("_NextSubtitle", characterSpeech[subtitleIndex].timeToNext);
             }
-            else
+            else if (characterSpeech[subtitleIndex].speech != null)
             {
                 Invoke("_NextSubtitle", characterSpeech[subtitleIndex].speech.length);
+            }
+            else 
+            {
+                Invoke("_NextSubtitle", 1f);
             }
 
 
@@ -464,7 +472,7 @@ namespace GGTools.Subtitle
                         if (s[characterSpeechPosition].Length > maxCharacters)
                         {
                             int cS = 0;
-                            string[] textPages = s[0].CreatePage(maxCharacters);
+                            string[] textPages = s[characterSpeechPosition].CreatePage(maxCharacters);
                             
                             foreach (string p in textPages)
                             {
