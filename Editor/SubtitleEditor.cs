@@ -1,3 +1,4 @@
+using System;
 using UnityEditor;
 using UnityEngine;
 
@@ -90,7 +91,7 @@ namespace GGTools.Subtitle
             namesProp = serializedObject.FindProperty("names");
 
             #region AdvancedSettings
-                        advancedSettingsProp = serializedObject.FindProperty("advancedSettings");
+            advancedSettingsProp = serializedObject.FindProperty("advancedSettings");
             csvSplitterProp = serializedObject.FindProperty("csvSplitter");
             characterNamePositionProp = serializedObject.FindProperty("characterNamePosition");
             characterSpeechPositionProp = serializedObject.FindProperty("characterSpeechPosition");
@@ -132,7 +133,7 @@ namespace GGTools.Subtitle
 
             playOnAwakeProp.boolValue = BoldToggle("Play On Awake", playOnAwakeProp.boolValue);
 
-            if (playOnAwakeProp.boolValue) 
+            if (playOnAwakeProp.boolValue)
             {
                 EditorGUILayout.Space();
 
@@ -157,7 +158,7 @@ namespace GGTools.Subtitle
 
             EditorGUILayout.Space();
 
-            if (listnameProp.stringValue != "List of Character Speech") 
+            if (listnameProp.stringValue != "List of Character Speech")
             {
                 EditorGUILayout.PropertyField(namesProp, new GUIContent("Names Style"), true);
             }
@@ -194,12 +195,29 @@ namespace GGTools.Subtitle
 
             if (advancedSettingsProp.boolValue)
             {
+                EditorGUI.indentLevel++;
                 EditorGUILayout.Space();
                 EditorGUILayout.PropertyField(csvSplitterProp, new GUIContent("CSV Spliter"));
                 EditorGUILayout.PropertyField(characterNamePositionProp, new GUIContent("Character Name Position"));
                 EditorGUILayout.PropertyField(characterSpeechPositionProp, new GUIContent("Character Speech Position"));
-
+                EditorGUI.indentLevel--;
             }
+            EditorGUILayout.Space();
+
+            EditorGUILayout.BeginHorizontal();
+
+            EditorGUILayout.PrefixLabel("Add Extension");
+
+            EditorGUILayout.Space();
+
+            var rect = EditorGUILayout.GetControlRect(false, 20);
+
+            if (GUI.Button(rect, "(select)", EditorStyles.miniButton))
+            {
+                ShowExtensions();
+            }
+
+            EditorGUILayout.EndHorizontal();
 
             serializedObject.ApplyModifiedProperties();
         }
@@ -236,7 +254,7 @@ namespace GGTools.Subtitle
                 EditorGUILayout.Space();
                 EditorGUILayout.PropertyField(hasTextBoxProp, new GUIContent("Has Text Box"));
                 EditorGUILayout.Space();
-                if (hasTextBoxProp.boolValue) 
+                if (hasTextBoxProp.boolValue)
                 {
                     EditorGUI.indentLevel++;
                     EditorGUILayout.PropertyField(nameTextProp, new GUIContent("Name TextBox"));
@@ -334,6 +352,35 @@ namespace GGTools.Subtitle
             }
             EditorGUI.indentLevel--;
 
+            
+        }
+
+        private void ShowExtensions()
+        {
+            
+            GenericMenu menu = new GenericMenu();
+
+            
+            var extensionsType = TypeCache.GetTypesDerivedFrom<SubtitleExtension>();
+
+            foreach (var type in extensionsType)
+            {
+                if (type.IsAbstract) continue;
+
+                menu.AddItem(new GUIContent(type.Name), false, () =>
+                {
+                    AddComponente(type);
+                });
+            }
+
+            menu.ShowAsContext();
+        }
+
+        private void AddComponente(Type type)
+        {
+            var subtitle = (Subtitle)target;
+
+            Undo.AddComponent(subtitle.gameObject, type);
         }
 
         public static bool BoldToggle(string label, bool value)
@@ -432,6 +479,10 @@ namespace GGTools.Subtitle
 
             EditorGUI.EndProperty();
         }
-    }
 
+
+    
+
+    }
 }
+
