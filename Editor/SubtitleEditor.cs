@@ -120,13 +120,17 @@ namespace GGTools.Subtitle
             {
                 if (GUILayout.Button("Read Script"))
                 {
+                    Undo.RecordObject(target, "Read Script");
                     subtitle.CreateDialogueEditor();
+                    EditorUtility.SetDirty(target);
                 }
                 EditorGUILayout.Space();
 
                 if (GUILayout.Button("Clear Script"))
                 {
+                    Undo.RecordObject(target, "Clear Script");
                     subtitle.ClearScriptEditor();
+                    EditorUtility.SetDirty(target);
                 }
                 EditorGUILayout.Space();
             }
@@ -187,6 +191,8 @@ namespace GGTools.Subtitle
 
             EditorGUILayout.PropertyField(scriptSpeechProp, new GUIContent(listnameProp.stringValue), true);
 
+            EditorGUI.indentLevel++;
+
             EditorGUILayout.Space();
 
             advancedSettingsProp.boolValue = BoldToggle("Advance Settings", advancedSettingsProp.boolValue);
@@ -202,6 +208,9 @@ namespace GGTools.Subtitle
                 EditorGUILayout.PropertyField(characterSpeechPositionProp, new GUIContent("Character Speech Position"));
                 EditorGUI.indentLevel--;
             }
+
+            EditorGUI.indentLevel--;
+
             EditorGUILayout.Space();
 
             EditorGUILayout.BeginHorizontal();
@@ -224,6 +233,7 @@ namespace GGTools.Subtitle
 
         void DrawSubtitleTypeFields(SubtitleType type)
         {
+            EditorGUI.indentLevel++;
 
             if (type != 0)
             {
