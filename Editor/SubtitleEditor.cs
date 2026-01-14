@@ -17,6 +17,8 @@ namespace GGTools.Subtitle
 
         SerializedProperty dialogueScriptProp;
         SerializedProperty subtitleProp;
+
+        SerializedProperty delayBetweenSubtitlesProp;
         #region TextReferences
         SerializedProperty subtitleTextProp;
         SerializedProperty maxCharactersProp;
@@ -89,6 +91,7 @@ namespace GGTools.Subtitle
             playOnAwakeProp = serializedObject.FindProperty("playOnAwake");
             delayToPlayProp = serializedObject.FindProperty("delayToPlay");
             namesProp = serializedObject.FindProperty("names");
+            delayBetweenSubtitlesProp = serializedObject.FindProperty("delayBetweenSubtitles");
 
             #region AdvancedSettings
             advancedSettingsProp = serializedObject.FindProperty("advancedSettings");
@@ -162,10 +165,6 @@ namespace GGTools.Subtitle
 
             EditorGUILayout.Space();
 
-            if (listnameProp.stringValue != "List of Character Speech")
-            {
-                EditorGUILayout.PropertyField(namesProp, new GUIContent("Names Style"), true);
-            }
 
             EditorGUI.BeginChangeCheck();
 
@@ -180,7 +179,6 @@ namespace GGTools.Subtitle
             if (EditorGUI.EndChangeCheck())
             {
                 subtitleTypeProp.intValue = (int)newValue;
-
             }
 
             EditorGUILayout.Space();
@@ -188,6 +186,26 @@ namespace GGTools.Subtitle
             DrawSubtitleTypeFields(newValue);
 
             EditorGUILayout.Space();
+
+            float old = EditorGUIUtility.labelWidth;
+
+            EditorGUIUtility.labelWidth = 400;
+
+            float delayBetweenSubtitles = EditorGUILayout.FloatField("Delay Between Subtitles", delayBetweenSubtitlesProp.floatValue);
+
+            EditorGUIUtility.labelWidth = old;
+
+            delayBetweenSubtitlesProp.floatValue = delayBetweenSubtitles;
+
+            EditorGUILayout.Space();
+
+            if (listnameProp.stringValue != "List of Character Speech")
+            {
+                EditorGUILayout.PropertyField(namesProp, new GUIContent("Names Style"), true);
+            }
+
+            EditorGUILayout.Space();
+
 
             EditorGUILayout.PropertyField(scriptSpeechProp, new GUIContent(listnameProp.stringValue), true);
 
@@ -213,7 +231,7 @@ namespace GGTools.Subtitle
 
             EditorGUILayout.Space();
 
-            EditorGUILayout.BeginHorizontal();
+  
 
             EditorGUILayout.PrefixLabel("Add Extension");
 
@@ -226,7 +244,7 @@ namespace GGTools.Subtitle
                 ShowExtensions();
             }
 
-            EditorGUILayout.EndHorizontal();
+ 
 
             serializedObject.ApplyModifiedProperties();
         }

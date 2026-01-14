@@ -22,6 +22,7 @@ namespace GGTools.Subtitle
         [SerializeField] private GameObject subtitle;
         [SerializeField] private SubtitleType subititleType = SubtitleType.Subtitle;
         [SerializeField] private TextAsset dialogueScript;
+        [SerializeField] private float delayBetweenSubtitles;
 
         #region TextReferences
         [SerializeField] private TextMeshProUGUI subtitleText;
@@ -117,6 +118,7 @@ namespace GGTools.Subtitle
                         scriptSpeech.characterSpeechs[0].speech = scriptSpeech.speech;
                         characterSpeech.AddRange(scriptSpeech.characterSpeechs);
                     }
+                    characterSpeech[^1].timeToNext += delayBetweenSubtitles;
                 }
             }
         }
@@ -174,6 +176,10 @@ namespace GGTools.Subtitle
                 characterSpeech[subtitleIndex].endEvents = null;
                 Invoke("StopSubtitle", 1f);
                 return;
+            }
+            if (characterSpeech[subtitleIndex].nextType == WhatToDoNext.Pause)
+            {
+                return;                
             }
             
             subtitleIndex++;
@@ -727,6 +733,7 @@ namespace GGTools.Subtitle
     {
         NextSubtitle = 1 << 0,
         Stop = 1 << 1,
+        Pause = 1 << 2,
     }
     /// <summary>
     /// Specifies how images should be resized after calling SetNativeSize().
