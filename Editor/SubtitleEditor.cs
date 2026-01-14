@@ -1,6 +1,7 @@
 using System;
 using UnityEditor;
 using UnityEngine;
+using System.Linq;
 
 
 namespace GGTools.Subtitle
@@ -136,6 +137,8 @@ namespace GGTools.Subtitle
                     EditorUtility.SetDirty(target);
                 }
                 EditorGUILayout.Space();
+
+                
             }
 
             playOnAwakeProp.boolValue = BoldToggle("Play On Awake", playOnAwakeProp.boolValue);
@@ -372,7 +375,10 @@ namespace GGTools.Subtitle
                 EditorGUILayout.LabelField("Audio Config", EditorStyles.boldLabel);
                 EditorGUILayout.Space();
                 EditorGUI.indentLevel++;
+                DrawAutoFillAudiosButton();
+                EditorGUILayout.Space();
                 EditorGUILayout.PropertyField(audioSourceProp, new GUIContent("Audio Source"));
+                EditorGUILayout.Space();
                 EditorGUILayout.PropertyField(nextSubtitleOnItEndProp, new GUIContent("Next Subtitle On It End"));
 
 
@@ -381,6 +387,89 @@ namespace GGTools.Subtitle
             EditorGUI.indentLevel--;
 
             
+        }
+
+        private void DrawAutoFillAudiosButton()
+        {
+
+            Rect r = EditorGUILayout.GetControlRect(false, EditorGUIUtility.singleLineHeight);
+            r.width = 240;
+            r.x += (EditorGUIUtility.currentViewWidth - r.width) * 0.5f;
+
+            if (GUI.Button(r, "Auto-fill Audios from Folder"))
+            {
+                FillSpeechesFromFolder();
+            }
+
+            
+        }
+
+        private void FillSpeechesFromFolder()
+        {
+            // Escolhe pasta
+            string absFolder = EditorUtility.OpenFolderPanel("Select Audio Folder", Application.dataPath, "");
+            if (string.IsNullOrEmpty(absFolder))
+                return;
+
+            // Tem que estar dentro do projeto (Assets)
+            if (!absFolder.Replace("\\", "/").StartsWith(Application.dataPath.Replace("\\", "/")))
+            {
+                EditorUtility.DisplayDialog("Invalid folder",
+                    "Please select a folder inside this project's Assets folder.", "OK");
+                return;
+            }
+
+            // Converte pra path relativo tipo: Assets/Audio/MyFolder
+            string relFolder = "Assets" + absFolder.Substring(Application.dataPath.Length);
+            relFolder = relFolder.Replace("\\", "/");
+
+            // Busca todos os AudioClips (inclui subpastas)
+            string[] guids = AssetDatabase.FindAssets("t:AudioClip", new[] { relFolder });
+            AudioClip[] clips = guids
+                .Select(g => AssetDatabase.GUIDToAssetPath(g))
+                .Select(p => AssetDatabase.LoadAssetAtPath<AudioClip>(p))
+                .Where(c => c != null)
+                .ToArray();
+
+            if (clips.Length == 0)
+            {
+                EditorUtility.DisplayDialog("No audio found",
+                    "No AudioClips were found in that folder.", "OK");
+                return;
+            }
+
+            // Ordena pelo nome pra ficar previsível
+            clips = clips.OrderBy(c => c.name).ToArray();
+
+            serializedObject.Update();
+
+            // sua lista: scriptSpeechProp (FindProperty("scriptSpeeches"))
+            if (scriptSpeechProp == null || !scriptSpeechProp.isArray)
+            {
+                Debug.LogError("scriptSpeechProp is null or not an array.");
+                return;
+            }
+
+            Undo.RecordObject(target, "Auto-fill speeches");
+
+            int count = Mathf.Min(scriptSpeechProp.arraySize, clips.Length);
+
+            for (int i = 0; i < count; i++)
+            {
+                SerializedProperty element = scriptSpeechProp.GetArrayElementAtIndex(i);
+
+                // Campo dentro do CharacterSpeech:
+                // você disse que é "speech"
+                SerializedProperty speechProp = element.FindPropertyRelative("speech");
+
+                if (speechProp != null)
+                    speechProp.objectReferenceValue = clips[i];
+            }
+
+            serializedObject.ApplyModifiedProperties();
+            EditorUtility.SetDirty(target);
+
+            Debug.Log($"Assigned {count} audio clips from '{relFolder}' into scriptSpeeches[i].speech");
         }
 
         private void ShowExtensions()
@@ -507,6 +596,8 @@ namespace GGTools.Subtitle
 
             EditorGUI.EndProperty();
         }
+
+        
 
 
     
