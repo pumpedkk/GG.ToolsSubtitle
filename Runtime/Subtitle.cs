@@ -82,6 +82,14 @@ namespace GGTools.Subtitle
             set => subtitleIndex = value;
         }
 
+        private bool subtitlePlaying;
+
+        public static bool SubtitlePlaying => _inst._SubtitlePlaying;
+        private bool _SubtitlePlaying
+        {
+            get => subtitlePlaying;
+        }
+
         void Awake()
         {
             if (_inst != null && _inst != this)
@@ -211,6 +219,7 @@ namespace GGTools.Subtitle
         {
             pause = !force;
             subtitle.SetActive(!force);
+            subtitlePlaying = false;
             if (force)
             {
                 pause = false;
@@ -264,6 +273,7 @@ namespace GGTools.Subtitle
             }
             else
             {
+                subtitlePlaying = true;
                 characterSpeech[subIndex].startEvent?.Invoke();
                 subtitle.SetActive(true);
                 if (subititleType.HasFlag(SubtitleType.TypewriterEffect))
