@@ -54,7 +54,7 @@ namespace GGTools.Subtitle
         #endregion
 
         #region AudioReferences
-        [SerializeField] private AudioSource audioSource;
+        public AudioSource audioSource;
         [SerializeField] private bool nextSubtitleOnItEnd;
 
 
