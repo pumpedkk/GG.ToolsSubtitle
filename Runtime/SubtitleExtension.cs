@@ -3,7 +3,7 @@ using GGTools.Subtitle;
 
 public abstract class SubtitleExtension : MonoBehaviour
 {
-    private Subtitle subtitle;
+    protected Subtitle subtitle;
     public virtual void Reset()
     {
         subtitle = GetComponent<Subtitle>();
