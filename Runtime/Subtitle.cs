@@ -21,7 +21,7 @@ namespace GGTools.Subtitle
 
         [SerializeField] private GameObject subtitle;
         [SerializeField] private SubtitleType subititleType = SubtitleType.Subtitle;
-        [SerializeField] private TextAsset dialogueScript;
+        [SerializeField] public TextAsset dialogueScript;
         [SerializeField] private float delayBetweenSubtitles;
 
         #region TextReferences
@@ -32,7 +32,7 @@ namespace GGTools.Subtitle
         #region NameReferences
         [SerializeField] private TextMeshProUGUI nameText;
         [SerializeField] private bool hasTextBox;
-        [SerializeField] private List<NameStyle> names = new List<NameStyle>();
+        [SerializeField] public List<NameStyle> names = new List<NameStyle>();
         #endregion
 
         #region PortraitReferences
