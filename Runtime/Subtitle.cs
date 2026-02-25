@@ -75,7 +75,7 @@ namespace GGTools.Subtitle
         [SerializeField] private int characterSpeechPosition = 1;
         #endregion
 
-        public static int SubtitleIndex => _inst._SubtitleIndex;
+        public static int SubtitleIndex => _inst!= null ? _inst._SubtitleIndex : -1;
         private int _SubtitleIndex
         {
             get => subtitleIndex;
@@ -84,7 +84,7 @@ namespace GGTools.Subtitle
 
         private bool subtitlePlaying;
 
-        public static bool SubtitlePlaying => _inst._SubtitlePlaying;
+        public static bool SubtitlePlaying => _inst != null ? _inst._SubtitlePlaying : false;
         private bool _SubtitlePlaying
         {
             get => subtitlePlaying;
