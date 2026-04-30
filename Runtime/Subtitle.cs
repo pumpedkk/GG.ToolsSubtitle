@@ -139,24 +139,10 @@ namespace GGTools.Subtitle
         public static void StartSubtitle() => _inst._StartSubtitle();
         private void _StartSubtitle()
         {
-            SubtitleInstance(0);
             subtitleIndex = 0;
             waitingForPlayerInput = false;
-
-            if (characterSpeech[subtitleIndex].timeToNext > 0)
-            {
-                Invoke("_NextSubtitle", characterSpeech[subtitleIndex].timeToNext);
-            }
-            else if (characterSpeech[subtitleIndex].speech != null)
-            {
-                Invoke("_NextSubtitle", characterSpeech[subtitleIndex].speech.length);
-            }
-            else
-            {
-                Invoke("_NextSubtitle", 1f);
-            }
-
-
+            SubtitleInstance(0);
+            _ScheduleTimer();
         }
 
         /// <summary>
@@ -167,52 +153,59 @@ namespace GGTools.Subtitle
 
 
         /// <summary>
-        /// Advances to the next subtitle in the sequence, handling stop conditions
-        /// and scheduling the following entry.
+        /// Advances to the next subtitle in the sequence. Only acts after the timer has fired
+        /// and set waitingForPlayerInput (i.e. the current subtitle has finished its display time).
         /// </summary>
         public static void NextSubtitle() => _inst._NextSubtitle();
         private void _NextSubtitle()
         {
-            if (characterSpeech.Count <= subtitleIndex)
+            if (!waitingForPlayerInput) return;
+            waitingForPlayerInput = false;
+            _Advance();
+        }
+
+        private void _TimerFired()
+        {
+            if (characterSpeech.Count <= subtitleIndex) return;
+
+            characterSpeech[subtitleIndex].endEvents?.Invoke();
+
+            if (characterSpeech[subtitleIndex].nextType == WhatToDoNext.Stop)
             {
-                Debug.LogError("No More Speech");
+                characterSpeech[subtitleIndex].nextType = WhatToDoNext.NextSubtitle;
+                characterSpeech[subtitleIndex].endEvents = null;
+                Invoke("StopSubtitle", 1f);
                 return;
             }
-
-            if (!waitingForPlayerInput)
+            if (characterSpeech[subtitleIndex].nextType == WhatToDoNext.Pause)
             {
-                characterSpeech[subtitleIndex].endEvents?.Invoke();
-
-                if (characterSpeech[subtitleIndex].nextType == WhatToDoNext.Stop)
-                {
-                    characterSpeech[subtitleIndex].nextType = WhatToDoNext.NextSubtitle;
-                    characterSpeech[subtitleIndex].endEvents = null;
-                    Invoke("StopSubtitle", 1f);
-                    return;
-                }
-                if (characterSpeech[subtitleIndex].nextType == WhatToDoNext.Pause)
-                {
-                    waitingForPlayerInput = true;
-                    return;
-                }
+                waitingForPlayerInput = true;
+                return;
             }
+            _Advance();
+        }
 
-            waitingForPlayerInput = false;
+        private void _Advance()
+        {
             subtitleIndex++;
+            if (subtitleIndex >= characterSpeech.Count)
+            {
+                _StopSubtitle(true);
+                return;
+            }
             SubtitleInstance(subtitleIndex);
+            _ScheduleTimer();
+        }
 
-            if (characterSpeech[subtitleIndex].timeToNext > 0)
+        private void _ScheduleTimer()
+        {
+            var s = characterSpeech[subtitleIndex];
+            if (s.timeToNext == 0)
             {
-                Invoke("_NextSubtitle", characterSpeech[subtitleIndex].timeToNext);
+                waitingForPlayerInput = true;
+                return;
             }
-            else if (characterSpeech[subtitleIndex].speech != null)
-            {
-                Invoke("_NextSubtitle", characterSpeech[subtitleIndex].speech.length);
-            }
-            else
-            {
-                Invoke("_NextSubtitle", 1f);
-            }
+            Invoke(nameof(_TimerFired), s.timeToNext);
         }
 
         public static void Stop() => _inst._StopSubtitle(true);
@@ -257,23 +250,14 @@ namespace GGTools.Subtitle
             }
 
             waitingForPlayerInput = false;
-            CancelInvoke(nameof(_NextSubtitle));
+            CancelInvoke(nameof(_TimerFired));
             subtitleIndex--;
             SubtitleInstance(subtitleIndex);
-
-            if (characterSpeech[subtitleIndex].timeToNext > 0)
-            {
-                Invoke(nameof(_NextSubtitle), characterSpeech[subtitleIndex].timeToNext);
-            }
-            else if (characterSpeech[subtitleIndex].speech != null)
-            {
-                Invoke(nameof(_NextSubtitle), characterSpeech[subtitleIndex].speech.length);
-            }
-            else
-            {
-                Invoke(nameof(_NextSubtitle), 1f);
-            }
+            _ScheduleTimer();
         }
+
+        public static bool HasNextSubtitle => _inst.subtitleIndex < _inst.characterSpeech.Count - 1;
+        public static bool HasPreviousSubtitle => _inst.subtitleIndex > 0;
 
         /// <summary>
         /// Jumps directly to a specific subtitle index and plays it immediately.
@@ -282,9 +266,12 @@ namespace GGTools.Subtitle
         public static void JumpSubtitle(int jumpIndex) => _inst._JumpSubtitle(jumpIndex);
         private void _JumpSubtitle(int jumpIndex)
         {
-            subtitleIndex = --jumpIndex;
             waitingForPlayerInput = false;
-            _NextSubtitle();
+            CancelInvoke(nameof(_TimerFired));
+            subtitleIndex = jumpIndex - 1;
+            if (subtitleIndex < 0) subtitleIndex = 0;
+            SubtitleInstance(subtitleIndex);
+            _ScheduleTimer();
         }
         /// <summary>
         /// Displays a subtitle entry based on its index, updating text, name, portraits,
