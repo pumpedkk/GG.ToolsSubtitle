@@ -241,6 +241,36 @@ namespace GGTools.Subtitle
             }
         }
         /// <summary>
+        /// Goes back to the previous subtitle in the sequence.
+        /// </summary>
+        public static void PreviousSubtitle() => _inst._PreviousSubtitle();
+        private void _PreviousSubtitle()
+        {
+            if (subtitleIndex <= 0)
+            {
+                Debug.LogWarning("Already at the first subtitle.");
+                return;
+            }
+
+            CancelInvoke(nameof(_NextSubtitle));
+            subtitleIndex--;
+            SubtitleInstance(subtitleIndex);
+
+            if (characterSpeech[subtitleIndex].timeToNext > 0)
+            {
+                Invoke(nameof(_NextSubtitle), characterSpeech[subtitleIndex].timeToNext);
+            }
+            else if (characterSpeech[subtitleIndex].speech != null)
+            {
+                Invoke(nameof(_NextSubtitle), characterSpeech[subtitleIndex].speech.length);
+            }
+            else
+            {
+                Invoke(nameof(_NextSubtitle), 1f);
+            }
+        }
+
+        /// <summary>
         /// Jumps directly to a specific subtitle index and plays it immediately.
         /// </summary>
         /// <param name="jumpIndex">Index to jump to (1-based).</param>
