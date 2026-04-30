@@ -14,6 +14,7 @@ namespace GGTools.Subtitle
         private static Subtitle _inst;
         private int subtitleIndex;
         private bool pause;
+        private bool waitingForPlayerInput;
 
         [HideInInspector][SerializeField] private string listName = "List of Character Speech";
 
@@ -140,6 +141,7 @@ namespace GGTools.Subtitle
         {
             SubtitleInstance(0);
             subtitleIndex = 0;
+            waitingForPlayerInput = false;
 
             if (characterSpeech[subtitleIndex].timeToNext > 0)
             {
@@ -176,20 +178,26 @@ namespace GGTools.Subtitle
                 Debug.LogError("No More Speech");
                 return;
             }
-            characterSpeech[subtitleIndex].endEvents?.Invoke();
-            
-            if (characterSpeech[subtitleIndex].nextType == WhatToDoNext.Stop)
+
+            if (!waitingForPlayerInput)
             {
-                characterSpeech[subtitleIndex].nextType = WhatToDoNext.NextSubtitle;
-                characterSpeech[subtitleIndex].endEvents = null;
-                Invoke("StopSubtitle", 1f);
-                return;
+                characterSpeech[subtitleIndex].endEvents?.Invoke();
+
+                if (characterSpeech[subtitleIndex].nextType == WhatToDoNext.Stop)
+                {
+                    characterSpeech[subtitleIndex].nextType = WhatToDoNext.NextSubtitle;
+                    characterSpeech[subtitleIndex].endEvents = null;
+                    Invoke("StopSubtitle", 1f);
+                    return;
+                }
+                if (characterSpeech[subtitleIndex].nextType == WhatToDoNext.Pause)
+                {
+                    waitingForPlayerInput = true;
+                    return;
+                }
             }
-            if (characterSpeech[subtitleIndex].nextType == WhatToDoNext.Pause)
-            {
-                return;                
-            }
-            
+
+            waitingForPlayerInput = false;
             subtitleIndex++;
             SubtitleInstance(subtitleIndex);
 
@@ -201,15 +209,10 @@ namespace GGTools.Subtitle
             {
                 Invoke("_NextSubtitle", characterSpeech[subtitleIndex].speech.length);
             }
-            else 
+            else
             {
                 Invoke("_NextSubtitle", 1f);
             }
-
-
-
-
-
         }
 
         public static void Stop() => _inst._StopSubtitle(true);
@@ -217,6 +220,7 @@ namespace GGTools.Subtitle
         public void StopSubtitle() => _StopSubtitle();
         private void _StopSubtitle(bool force = true)
         {
+            waitingForPlayerInput = false;
             pause = !force;
             subtitle.SetActive(!force);
             subtitlePlaying = false;
@@ -252,6 +256,7 @@ namespace GGTools.Subtitle
                 return;
             }
 
+            waitingForPlayerInput = false;
             CancelInvoke(nameof(_NextSubtitle));
             subtitleIndex--;
             SubtitleInstance(subtitleIndex);
@@ -278,6 +283,7 @@ namespace GGTools.Subtitle
         private void _JumpSubtitle(int jumpIndex)
         {
             subtitleIndex = --jumpIndex;
+            waitingForPlayerInput = false;
             _NextSubtitle();
         }
         /// <summary>
