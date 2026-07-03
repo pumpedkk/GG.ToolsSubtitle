@@ -57,6 +57,8 @@ namespace GGTools.Subtitle
         #region AudioReferences
         public AudioSource audioSource;
         [SerializeField] private bool nextSubtitleOnItEnd;
+        private bool audioEnabled = true;
+        private AudioClip pendingClip;
 
 
         #endregion
@@ -206,6 +208,25 @@ namespace GGTools.Subtitle
                 return;
             }
             Invoke(nameof(_TimerFired), s.timeToNext);
+        }
+
+        public static void SetAudioEnabled(bool on) => _inst?._SetAudioEnabled(on);
+        private void _SetAudioEnabled(bool on)
+        {
+            audioEnabled = on;
+            if (on)
+            {
+                audioSource.UnPause();
+                if (pendingClip != null)
+                {
+                    audioSource.PlayOneShot(pendingClip);
+                    pendingClip = null;
+                }
+            }
+            else
+            {
+                audioSource.Pause();
+            }
         }
 
         public static void Stop() => _inst._StopSubtitle(true);
@@ -441,7 +462,12 @@ namespace GGTools.Subtitle
                 if (subititleType.HasFlag(SubtitleType.Audio))
                 {
                     if(characterSpeech[subIndex].speech != null)
-                        audioSource.PlayOneShot(characterSpeech[subIndex].speech);
+                    {
+                        if (audioEnabled)
+                            audioSource.PlayOneShot(characterSpeech[subIndex].speech);
+                        else
+                            pendingClip = characterSpeech[subIndex].speech;
+                    }
                 }
             }
         }
