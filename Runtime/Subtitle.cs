@@ -216,11 +216,17 @@ namespace GGTools.Subtitle
             audioEnabled = on;
             if (on)
             {
-                audioSource.UnPause();
                 if (pendingClip != null)
                 {
-                    audioSource.PlayOneShot(pendingClip);
+                    audioSource.Stop();
+                    audioSource.clip = pendingClip;
+                    audioSource.loop = false;
+                    audioSource.Play();
                     pendingClip = null;
+                }
+                else
+                {
+                    audioSource.UnPause();
                 }
             }
             else
@@ -461,12 +467,17 @@ namespace GGTools.Subtitle
                 }
                 if (subititleType.HasFlag(SubtitleType.Audio))
                 {
-                    if(characterSpeech[subIndex].speech != null)
+                    var clip = characterSpeech[subIndex].speech;
+                    if (audioEnabled)
                     {
-                        if (audioEnabled)
-                            audioSource.PlayOneShot(characterSpeech[subIndex].speech);
-                        else
-                            pendingClip = characterSpeech[subIndex].speech;
+                        audioSource.Stop();
+                        audioSource.clip = clip;
+                        audioSource.loop = false;
+                        if (clip != null) audioSource.Play();
+                    }
+                    else
+                    {
+                        pendingClip = clip;
                     }
                 }
             }
